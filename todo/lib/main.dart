@@ -30,6 +30,9 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _titleController = TextEditingController();
+  List<String> _tasks = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,47 +41,38 @@ class _HomeState extends State<Home> {
         title: const Text("Todo App", style: TextStyle(fontSize: 25)),
         elevation: 8,
       ),
-      body: Container(
-        child: Column(
-          children: <Widget>[
-            ListView(
-              shrinkWrap: true,
-              padding: const EdgeInsets.all(10),
-              children: <Widget>[
-                Container(
-                  height: 50,
-                  color: Colors.purple[900],
-                  child: const Text("Container A"),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Container(
-                  height: 50,
-                  color: Colors.purple[900],
-                  child: const Text("Container B"),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Container(
-                  height: 50,
-                  color: Colors.purple[900],
-                  child: const Text("Container C"),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Container(
-                  height: 50,
-                  color: Colors.purple[900],
-                  child: const Text("Container D"),
-                )
-              ],
-            )
-          ],
-        ),
-      ),
+      body: Form(
+          key: _formKey,
+          child: Column(
+            children: <Widget>[
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(helperText: "Enter Todo"),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please Add A Task";
+                  }
+                  return null;
+                },
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _tasks.add(_titleController.text);
+                      _titleController.clear();
+                    });
+                  },
+                  child: const Text("Add Todo")),
+              Expanded(
+                  child: ListView.builder(
+                      itemCount: _tasks.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return ListTile(
+                          leading: Text(_tasks[index]),
+                        );
+                      })),
+            ],
+          )),
     );
   }
 }
