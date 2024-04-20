@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todo/Models/Todo.dart';
 
 void main() {
   runApp(const MyApp());
@@ -32,7 +33,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
-  List<String> _tasks = [];
+  final TextEditingController __descriptionController = TextEditingController();
+  List<Todo> _tasks = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,19 +49,46 @@ class _HomeState extends State<Home> {
             children: <Widget>[
               TextFormField(
                 controller: _titleController,
-                decoration: const InputDecoration(helperText: "Enter Todo"),
+                decoration: const InputDecoration(
+                    hintText: "Enter Todo Title",
+                    hintStyle: TextStyle(fontSize: 12)),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return "Please Add A Task";
+                    return "Please Add A Title";
                   }
                   return null;
                 },
               ),
+              const SizedBox(
+                height: 20,
+              ),
+              TextFormField(
+                decoration: const InputDecoration(
+                    hintText: "Enter Todo Description",
+                    hintStyle: TextStyle(fontSize: 12)),
+                controller: __descriptionController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please Add A Description";
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(
+                height: 20,
+              ),
               ElevatedButton(
                   onPressed: () {
                     setState(() {
-                      _tasks.add(_titleController.text);
-                      _titleController.clear();
+                      if (_formKey.currentState!.validate()) {
+                        var todo = Todo(
+                            Id: _tasks.length + 1,
+                            Title: _titleController.text,
+                            Description: __descriptionController.text);
+                        _tasks.add(todo);
+                        _titleController.clear();
+                        __descriptionController.clear();
+                      }
                     });
                   },
                   child: const Text("Add Todo")),
@@ -68,7 +97,9 @@ class _HomeState extends State<Home> {
                       itemCount: _tasks.length,
                       itemBuilder: (BuildContext context, int index) {
                         return ListTile(
-                          leading: Text(_tasks[index]),
+                          leading: Text(_tasks[index].Id.toString()),
+                          title: Text(_tasks[index].Title),
+                          subtitle: Text(_tasks[index].Description),
                         );
                       })),
             ],
