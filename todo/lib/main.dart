@@ -43,67 +43,74 @@ class _HomeState extends State<Home> {
         title: const Text("Todo App", style: TextStyle(fontSize: 25)),
         elevation: 8,
       ),
-      body: Form(
-          key: _formKey,
-          child: Column(
-            children: <Widget>[
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                    hintText: "Enter Todo Title",
-                    hintStyle: TextStyle(fontSize: 12)),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Please Add A Title";
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              TextFormField(
-                decoration: const InputDecoration(
-                    hintText: "Enter Todo Description",
-                    hintStyle: TextStyle(fontSize: 12)),
-                controller: __descriptionController,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Please Add A Description";
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      if (_formKey.currentState!.validate()) {
-                        var todo = Todo(
-                            Id: _tasks.length + 1,
-                            Title: _titleController.text,
-                            Description: __descriptionController.text);
-                        _tasks.add(todo);
-                        _titleController.clear();
-                        __descriptionController.clear();
-                      }
-                    });
+      body: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Form(
+            key: _formKey,
+            child: Column(
+              children: <Widget>[
+                TextFormField(
+                  controller: _titleController,
+                  decoration: const InputDecoration(
+                      hintText: "Enter Todo Title",
+                      hintStyle: TextStyle(fontSize: 12)),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Please Add A Title";
+                    }
+                    return null;
                   },
-                  child: const Text("Add Todo")),
-              Expanded(
-                  child: ListView.builder(
-                      itemCount: _tasks.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return ListTile(
-                          leading: Text(_tasks[index].Id.toString()),
-                          title: Text(_tasks[index].Title),
-                          subtitle: Text(_tasks[index].Description),
-                        );
-                      })),
-            ],
-          )),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                TextFormField(
+                  decoration: const InputDecoration(
+                      hintText: "Enter Todo Description",
+                      hintStyle: TextStyle(fontSize: 12)),
+                  controller: __descriptionController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Please Add A Description";
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        if (_formKey.currentState!.validate()) {
+                          var todo = Todo(
+                              Id: _tasks.length + 1,
+                              Title: _titleController.text,
+                              Description: __descriptionController.text,
+                              IsComplete: false);
+                          _tasks.add(todo);
+                          _titleController.clear();
+                          __descriptionController.clear();
+                        }
+                      });
+                    },
+                    child: const Text("Add Todo")),
+                Expanded(
+                    child: ListView.builder(
+                        itemCount: _tasks.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return ListTile(
+                            leading: Text(_tasks[index].Id.toString()),
+                            title: Text(_tasks[index].Title),
+                            subtitle: Text(_tasks[index].Description),
+                            trailing: Text(_tasks[index].IsComplete
+                                ? "Complete"
+                                : "Not Complete"),
+                          );
+                        })),
+              ],
+            )),
+      ),
     );
   }
 }
