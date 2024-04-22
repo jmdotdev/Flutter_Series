@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:todo/Models/Todo.dart';
+import 'package:todo/Models/todo.dart';
 
 void main() {
   runApp(const MyApp());
@@ -34,7 +34,7 @@ class _HomeState extends State<Home> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController __descriptionController = TextEditingController();
-  List<Todo> _tasks = [];
+  final List<Todo> _tasks = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,13 +99,18 @@ class _HomeState extends State<Home> {
                     child: ListView.builder(
                         itemCount: _tasks.length,
                         itemBuilder: (BuildContext context, int index) {
-                          return ListTile(
-                            leading: Text(_tasks[index].Id.toString()),
-                            title: Text(_tasks[index].Title),
-                            subtitle: Text(_tasks[index].Description),
-                            trailing: Text(_tasks[index].IsComplete
-                                ? "Complete"
-                                : "Not Complete"),
+                          return Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: Colors.grey)),
+                            child: ListTile(
+                              leading: Text(_tasks[index].Id.toString()),
+                              title: Text(_tasks[index].Title),
+                              subtitle: Text(_tasks[index].Description),
+                              trailing: Text(_tasks[index].IsComplete
+                                  ? "Complete"
+                                  : "Not Complete"),
+                            ),
                           );
                         })),
               ],
