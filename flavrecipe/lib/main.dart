@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flavrecipe/Models/recipe.dart';
+import 'package:flavrecipe/Screens/recipe_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -18,10 +19,10 @@ class MyApp extends StatelessWidget {
       title: 'Recipe App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.white70),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'FavRecipe'),
+      home: const MyHomePage(title: 'FlavRecipe'),
     );
   }
 }
@@ -61,7 +62,6 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         elevation: 8.0,
         centerTitle: true,
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
       body: Padding(
@@ -70,17 +70,65 @@ class _MyHomePageState extends State<MyHomePage> {
           future: _recipe,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              return ListView.builder(
+              return GridView.builder(
                   itemCount: snapshot.data!.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                  ),
                   itemBuilder: (context, index) {
-                    return ListTile(
-                      leading: Text(snapshot.data![index].label),
+                    return Container(
+                      margin: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 3,
+                              blurRadius: 10,
+                              offset: const Offset(0, 3))
+                        ],
+                      ),
+                      child: GestureDetector(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            ClipOval(
+                              child: CircleAvatar(
+                                backgroundImage: NetworkImage(
+                                  snapshot.data![index].image,
+                                ),
+                                radius: 60,
+                              ),
+                            ),
+                            // const SizedBox(
+                            //   height: 10,
+                            // ),
+                            Text(
+                              snapshot.data![index].label,
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => RecipeDetail(
+                                  label: snapshot.data![index].label,
+                                  image: snapshot.data![index].image,
+                                  source: snapshot.data![index].source)));
+                        },
+                      ),
                     );
                   });
             } else if (snapshot.hasError) {
-              return Text(snapshot.error.toString());
+              return const Center(
+                child: Text("Error Fetching Recipes"),
+              );
             }
-            return const CircularProgressIndicator();
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
           },
         ),
       ),
