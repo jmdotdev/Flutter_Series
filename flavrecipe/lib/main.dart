@@ -37,99 +37,183 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   late Future<List<Recipe>> _recipe;
-
-  Future<List<Recipe>> getRecipes() async {
+  final _formKey = GlobalKey<FormState>();
+  final searchController = TextEditingController();
+  String query = "banana";
+  bool isSearching = false;
+  Future<List<Recipe>> getRecipes(query) async {
     var response = await http.get(Uri.parse(
-        "https://api.edamam.com/api/recipes/v2?type=public&q=banana&app_id=db2d13b4&app_key=5e484bb46580cf5555266d661316b3f6"));
+        "https://api.edamam.com/api/recipes/v2?type=public&q=$query&app_id=db2d13b4&app_key=5e484bb46580cf5555266d661316b3f6"));
     if (response.statusCode == 200) {
       List<dynamic> hits = jsonDecode(response.body)['hits'];
       List<Recipe> recipes =
           hits.map((hit) => Recipe.fromJson(hit['recipe'])).toList();
       return recipes;
     }
-    throw const FormatException('failed to load recipes1');
+    throw const FormatException('failed to load recipes');
   }
 
   @override
   void initState() {
     super.initState();
-    _recipe = getRecipes();
+    _recipe = getRecipes(query);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        elevation: 8.0,
         centerTitle: true,
         title: Text(widget.title),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: FutureBuilder<List<Recipe>>(
-          future: _recipe,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return GridView.builder(
-                  itemCount: snapshot.data!.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
+        padding: const EdgeInsets.all(15.0),
+        child: Column(
+          children: [
+            SizedBox(
+              height: MediaQuery.sizeOf(context).height * 0.2,
+              child: Column(
+                children: [
+                  const Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "What Will You Cook Today?",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20),
+                      ),
+                      SizedBox(
+                        height: 5,
+                      ),
+                      Text(
+                        "Just type in a keyword and we will provide you with the recipe and ingredients needed",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 14),
+                      )
+                    ],
                   ),
-                  itemBuilder: (context, index) {
-                    return Container(
-                      margin: const EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              spreadRadius: 3,
-                              blurRadius: 10,
-                              offset: const Offset(0, 3))
-                        ],
-                      ),
-                      child: GestureDetector(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            ClipOval(
-                              child: CircleAvatar(
-                                backgroundImage: NetworkImage(
-                                  snapshot.data![index].image,
-                                ),
-                                radius: 60,
-                              ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: MediaQuery.sizeOf(context).width * 0.8,
+                          child: Form(
+                            key: _formKey,
+                            child: TextFormField(
+                              controller: searchController,
+                              decoration: const InputDecoration(
+                                  hintText: "type your keyword.eg.(banana)"),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return "Please Add A Description";
+                                }
+                                return null;
+                              },
                             ),
-                            // const SizedBox(
-                            //   height: 10,
-                            // ),
-                            Text(
-                              snapshot.data![index].label,
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
+                          ),
                         ),
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => RecipeDetail(
-                                  label: snapshot.data![index].label,
-                                  image: snapshot.data![index].image,
-                                  source: snapshot.data![index].source)));
-                        },
-                      ),
+                        Container(
+                            margin: const EdgeInsets.only(top: 20),
+                            child: InkWell(
+                                onTap: () async {
+                                  setState(() {
+                                    if (_formKey.currentState!.validate()) {
+                                      isSearching = true;
+                                      query = searchController.text;
+                                      _recipe = getRecipes(query);
+                                      searchController.clear();
+                                    }
+                                  });
+                                },
+                                child: const Icon(Icons.search))),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Expanded(
+              child: FutureBuilder<List<Recipe>>(
+                future: _recipe,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child:
+                          CircularProgressIndicator(), // Show progress indicator
                     );
-                  });
-            } else if (snapshot.hasError) {
-              return const Center(
-                child: Text("Error Fetching Recipes"),
-              );
-            }
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          },
+                  } else if (snapshot.hasError) {
+                    return const Center(
+                      child: Text("Error Fetching Recipes"),
+                    );
+                  } else if (snapshot.hasData) {
+                    return GridView.builder(
+                        itemCount: snapshot.data!.length,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                        ),
+                        itemBuilder: (context, index) {
+                          return Container(
+                            margin: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                    color: Colors.grey.withOpacity(0.5),
+                                    spreadRadius: 3,
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 3))
+                              ],
+                            ),
+                            child: GestureDetector(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  ClipOval(
+                                    child: CircleAvatar(
+                                      backgroundImage: NetworkImage(
+                                        snapshot.data![index].image,
+                                      ),
+                                      radius: 60,
+                                    ),
+                                  ),
+                                  // const SizedBox(
+                                  //   height: 10,
+                                  // ),
+                                  Text(
+                                    snapshot.data![index].label,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                              onTap: () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (context) => RecipeDetail(
+                                        label: snapshot.data![index].label,
+                                        image: snapshot.data![index].image,
+                                        source: snapshot.data![index].source)));
+                              },
+                            ),
+                          );
+                        });
+                  } else {
+                    return const Center(
+                      child: Text("Enter a keyword to search for recipes"),
+                    );
+                  }
+                },
+              ),
+            )
+          ],
         ),
       ),
     );
