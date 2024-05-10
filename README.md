@@ -1,6 +1,6 @@
 # Flutter Series
 
-Welcome to the Flutter Series repository! This repository is dedicated to documenting the journey of learning Flutter through the creation of various applications. Whether you're new to Flutter or looking to expand your knowledge, this series aims to provide insightful tutorials, code examples, and project demonstrations to help you master Flutter development.
+The Flutter Series repository is dedicated to documenting the journey of learning Flutter through the creation of various applications. Whether you're new to Flutter or looking to expand your knowledge, this series aims to provide insightful tutorials, code examples, and project demonstrations to help you master Flutter development.
 
 ## Table of Contents
 
