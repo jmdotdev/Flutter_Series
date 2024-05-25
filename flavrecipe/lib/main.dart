@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flavrecipe/Models/recipe.dart';
 import 'package:flavrecipe/Screens/recipe_detail.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +23,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'FlavRecipe'),
+      builder: EasyLoading.init(),
     );
   }
 }
@@ -39,8 +40,8 @@ class _MyHomePageState extends State<MyHomePage> {
   late Future<List<Recipe>> _recipe;
   final _formKey = GlobalKey<FormState>();
   final searchController = TextEditingController();
-  String query = "banana";
-  bool isSearching = false;
+  String query = "beef";
+  bool loading = false;
   Future<List<Recipe>> getRecipes(query) async {
     var response = await http.get(Uri.parse(
         "https://api.edamam.com/api/recipes/v2?type=public&q=$query&app_id=db2d13b4&app_key=5e484bb46580cf5555266d661316b3f6"));
@@ -122,7 +123,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 onTap: () async {
                                   setState(() {
                                     if (_formKey.currentState!.validate()) {
-                                      isSearching = true;
+                                      loading = true;
                                       query = searchController.text;
                                       _recipe = getRecipes(query);
                                       searchController.clear();
@@ -143,16 +144,12 @@ class _MyHomePageState extends State<MyHomePage> {
               child: FutureBuilder<List<Recipe>>(
                 future: _recipe,
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child:
-                          CircularProgressIndicator(), // Show progress indicator
-                    );
-                  } else if (snapshot.hasError) {
-                    return const Center(
-                      child: Text("Error Fetching Recipes"),
-                    );
-                  } else if (snapshot.hasData) {
+                  if (loading) {
+                    EasyLoading.showToast('loading $query recipes...',
+                        maskType: EasyLoadingMaskType.black);
+                  }
+                  if (snapshot.hasData) {
+                    loading = false;
                     return GridView.builder(
                         itemCount: snapshot.data!.length,
                         gridDelegate:
@@ -160,54 +157,61 @@ class _MyHomePageState extends State<MyHomePage> {
                           crossAxisCount: 2,
                         ),
                         itemBuilder: (context, index) {
-                          return Container(
-                            margin: const EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                    color: Colors.grey.withOpacity(0.5),
-                                    spreadRadius: 3,
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 3))
+                          return GestureDetector(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Padding(
+                                    padding: const EdgeInsets.all(4.0),
+                                    child: Column(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                          child: Image.network(
+                                            snapshot.data![index].image,
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height /
+                                                5.5,
+                                          ),
+                                        ),
+                                        Text(
+                                          snapshot.data![index].label,
+                                          textAlign: TextAlign.left,
+                                          // softWrap: true,
+                                          // maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    )),
                               ],
                             ),
-                            child: GestureDetector(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  ClipOval(
-                                    child: CircleAvatar(
-                                      backgroundImage: NetworkImage(
-                                        snapshot.data![index].image,
-                                      ),
-                                      radius: 60,
-                                    ),
-                                  ),
-                                  // const SizedBox(
-                                  //   height: 10,
-                                  // ),
-                                  Text(
-                                    snapshot.data![index].label,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
-                              onTap: () {
-                                Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (context) => RecipeDetail(
-                                        label: snapshot.data![index].label,
-                                        image: snapshot.data![index].image,
-                                        source: snapshot.data![index].source)));
-                              },
-                            ),
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => RecipeDetail(
+                                      label: snapshot.data![index].label,
+                                      image: snapshot.data![index].image,
+                                      source: snapshot.data![index].source,
+                                      totalTime: snapshot.data![index].totalTime,
+                                      yield: snapshot.data![index].yield,
+                                      ingredientLines: snapshot
+                                          .data![index].ingredientLines)));
+                            },
                           );
                         });
+                  }
+                  if (snapshot.hasError) {
+                    return const Center(
+                      child: Text("Error fetching recipes"),
+                    );
                   } else {
                     return const Center(
-                      child: Text("Enter a keyword to search for recipes"),
+                      child: CircularProgressIndicator(),
                     );
                   }
                 },

@@ -1,68 +1,111 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 
 class RecipeDetail extends StatelessWidget {
-  const RecipeDetail(
-      {super.key,
-      required this.label,
-      required this.image,
-      required this.source});
+  const RecipeDetail({
+    super.key,
+    required this.label,
+    required this.image,
+    required this.source,
+    required this.totalTime,
+    required this.yield,
+    required this.ingredientLines,
+  });
 
   final String label;
   final String image;
   final String source;
+  final double totalTime;
+  final double yield;
+  final List<String> ingredientLines;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(label),
-        centerTitle: true,
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          // Add your onPressed code here!
-        },
-        label: const Text('Make Favourite'),
-        icon: const Icon(Icons.shopping_cart),
-      ),
+      // appBar: AppBar(
+      //   title: Text(label),
+      //   centerTitle: true,
+      // ),
       body: ListView(
         children: [
           // Product image
           Image.network(
             image,
-            height: MediaQuery.of(context).size.height / 1.8,
+            height: MediaQuery.of(context).size.height / 2.5,
             fit: BoxFit.fill,
           ),
-
-          // Product title
+          //Recipe Title
           Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10.0),
-            child: Text(
-              label,
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+            padding: const EdgeInsets.only(left: 20.0, top: 20),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      label,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w700, fontSize: 25),
+                    )
+                  ],
+                ),
+                Row(
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.watch_later_rounded,
+                          color: Colors.green,
+                          size: 15,
+                        ),
+                        const SizedBox(
+                          width: 5,
+                        ),
+                        Text("${(totalTime ~/ 60)}" + "hrs")
+                      ],
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.star,
+                          color: Colors.green,
+                          size: 18,
+                        ),
+                        const SizedBox(
+                          width: 5,
+                        ),
+                        Text("${(yield)}")
+                      ],
+                    ),
+                  ],
+                )
+              ],
             ),
           ),
-
-          // Product description
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8.0),
-            child: Text(
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla eget risus lacus. Curabitur a turpis eros. Cras congue dui nec magna aliquet, quis vehicula libero egestas. Nullam at sollicitudin sem. Sed a augue dictum, tempor mi quis, feugiat neque. Aliquam egestas lectus orci, et rhoncus augue suscipit quis. Ut quis porta magna.'),
-          ),
-
-          // Product price
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              '\$100',
-              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500),
+          Padding(
+            padding: const EdgeInsets.only(left: 20, top: 20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Ingredients",
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
+                ),
+                ...ingredientLines.map((e) => ListTile(
+                      contentPadding: const EdgeInsets.all(0),
+                      leading: const Icon(
+                        Icons.food_bank,
+                        color: Colors.green,
+                      ),
+                      title: Text(e),
+                    ))
+              ],
             ),
-          ),
-          const SizedBox(
-            height: 30.0,
-          ),
+          )
         ],
       ),
     );
