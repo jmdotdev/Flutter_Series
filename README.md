@@ -17,7 +17,7 @@ The Flutter Series is a comprehensive learning resource for Flutter developers o
 
 ## Project Structure
 
-The repository is organized into separate directories for each project within the Flutter Series. Each project directory contains its own README.md file providing detailed information about the project, including its purpose, features, and instructions for running the application.
+The repository is organized into separate directories with each project in its distinct branch. Each project directory contains its own README.md file providing detailed information about the project, including its purpose, features, and instructions for running the application.
 
 ## Installation
 
