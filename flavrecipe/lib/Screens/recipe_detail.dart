@@ -2,7 +2,7 @@ import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 
-class RecipeDetail extends StatelessWidget {
+class RecipeDetail extends StatefulWidget {
   const RecipeDetail({
     super.key,
     required this.label,
@@ -21,17 +21,41 @@ class RecipeDetail extends StatelessWidget {
   final List<String> ingredientLines;
 
   @override
+  State<RecipeDetail> createState() => _RecipeDetailState();
+}
+
+class _RecipeDetailState extends State<RecipeDetail> {
+  int _selectedIndex = 0;
+
+  void setActiveIndex(index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       // appBar: AppBar(
       //   title: Text(label),
       //   centerTitle: true,
       // ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.favorite_border_outlined), label: "Favourite"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Account")
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: const Color.fromARGB(255, 1, 36, 65),
+        onTap: setActiveIndex,
+      ),
       body: ListView(
         children: [
           // Product image
           Image.network(
-            image,
+            widget.image,
             height: MediaQuery.of(context).size.height / 2.5,
             fit: BoxFit.fill,
           ),
@@ -43,7 +67,7 @@ class RecipeDetail extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      label,
+                      widget.label,
                       style: const TextStyle(
                           fontWeight: FontWeight.w700, fontSize: 25),
                     )
@@ -61,7 +85,7 @@ class RecipeDetail extends StatelessWidget {
                         const SizedBox(
                           width: 5,
                         ),
-                        Text("${(totalTime ~/ 60)}" + "hrs")
+                        Text("${(widget.totalTime ~/ 60)}" + "hrs")
                       ],
                     ),
                     const SizedBox(
@@ -77,7 +101,7 @@ class RecipeDetail extends StatelessWidget {
                         const SizedBox(
                           width: 5,
                         ),
-                        Text("${(yield)}")
+                        Text("${(widget.yield)}")
                       ],
                     ),
                   ],
@@ -95,7 +119,7 @@ class RecipeDetail extends StatelessWidget {
                   "Ingredients",
                   style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
                 ),
-                ...ingredientLines.map((e) => ListTile(
+                ...widget.ingredientLines.map((e) => ListTile(
                       contentPadding: const EdgeInsets.all(0),
                       leading: const Icon(
                         Icons.food_bank,

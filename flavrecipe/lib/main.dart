@@ -42,6 +42,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final searchController = TextEditingController();
   String query = "beef";
   bool loading = false;
+  int _selectedIndex = 0;
   Future<List<Recipe>> getRecipes(query) async {
     var response = await http.get(Uri.parse(
         "https://api.edamam.com/api/recipes/v2?type=public&q=$query&app_id=db2d13b4&app_key=5e484bb46580cf5555266d661316b3f6"));
@@ -52,6 +53,12 @@ class _MyHomePageState extends State<MyHomePage> {
       return recipes;
     }
     throw const FormatException('failed to load recipes');
+  }
+
+  void setActiveIndex(index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   @override
@@ -66,6 +73,18 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         centerTitle: true,
         title: Text(widget.title),
+      ),
+      bottomNavigationBar:
+        BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.favorite_border_outlined), label: "Favourite"),
+        BottomNavigationBarItem(icon: Icon(Icons.person), label: "Account")
+      ],
+      currentIndex: _selectedIndex,
+      selectedItemColor: const Color.fromARGB(255, 1, 36, 65),
+      onTap: setActiveIndex,
       ),
       body: Padding(
         padding: const EdgeInsets.all(15.0),
@@ -197,7 +216,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                       label: snapshot.data![index].label,
                                       image: snapshot.data![index].image,
                                       source: snapshot.data![index].source,
-                                      totalTime: snapshot.data![index].totalTime,
+                                      totalTime:
+                                          snapshot.data![index].totalTime,
                                       yield: snapshot.data![index].yield,
                                       ingredientLines: snapshot
                                           .data![index].ingredientLines)));
